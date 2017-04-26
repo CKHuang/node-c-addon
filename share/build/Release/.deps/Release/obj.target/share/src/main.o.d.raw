@@ -1,0 +1,6 @@
+Release/obj.target/share/src/main.o: ../src/main.cc \
+  /Users/ming/.node-gyp/6.9.1/include/node/node.h \
+  /Users/ming/.node-gyp/6.9.1/include/node/v8.h \
+  /Users/ming/.node-gyp/6.9.1/include/node/v8-version.h \
+  /Users/ming/.node-gyp/6.9.1/include/node/v8config.h \
+  /Users/ming/.node-gyp/6.9.1/include/node/node_version.h
