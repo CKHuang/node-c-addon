@@ -1,1 +1,1 @@
-cmd_Release/caddon.node := c++ -bundle -undefined dynamic_lookup -Wl,-search_paths_first -mmacosx-version-min=10.5 -arch x86_64 -L./Release  -o Release/caddon.node Release/obj.target/caddon/helloworld.o 
+cmd_Release/caddon.node := c++ -bundle -undefined dynamic_lookup -Wl,-no_pie -Wl,-search_paths_first -mmacosx-version-min=10.7 -arch x86_64 -L./Release  -o Release/caddon.node Release/obj.target/caddon/helloworld.o 
