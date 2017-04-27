@@ -8,6 +8,47 @@ namespace share {
 	using v8::FunctionCallbackInfo;
 	using v8::Isolate;
 	using v8::Local;
+	using v8::Array;
+	using v8::Object;
+
+
+	void sub(const FunctionCallbackInfo<Value>& args) {
+		Isolate* isolate = args.GetIsolate();
+
+		// 数组里面的数相加
+		if ( !args[0]->IsArray() )
+		{
+			isolate->ThrowException(Exception::TypeError(
+				String::NewFromUtf8(isolate,"Wrong argumenst type")
+			));
+			return ;
+		}
+		
+		double cout = 0;
+
+		// 获取参数中的数组数据
+		Local<Array> arr = Local<Array>::Cast(args[0]);
+		int arrLen = arr->Length();
+
+		for( int i = 0; i < arrLen; i++ ) {
+			if (arr->Get(i)->IsNumber())
+			{
+				cout += arr->Get(i)->NumberValue();
+			}
+		}
+
+		Local<Number> output = Number::New(isolate,cout);
+		args.GetReturnValue().Set(output);
+
+
+
+		// // 实例化一个数组,数组长度为3
+		// Handle<Array> array = Array::New(3);
+
+		// // 设置数组的值
+		// array->Set(0, Integer::New(1));
+		// array->Set(0, Integer::New(2));
+	}
 
 	void add(const FunctionCallbackInfo<Value>& args) {
 		Isolate* isolate = args.GetIsolate();
@@ -56,6 +97,14 @@ namespace share {
 	}
 
 
+	void CreateObject(const FunctionCallbackInfo<Value>& args) {
+		Isolate* isolate = args.GetIsolate();
+		Local<Object> obj = Object::New(isolate);
+		obj->Set(String::NewFromUtf8(isolate, "msg"),args[0]->ToString());
+
+		args.GetReturnValue().Set(obj);
+	}
+
 	/**
 	 * 回调函数返回数据
 	 */
@@ -78,6 +127,8 @@ namespace share {
 		 */
 		NODE_SET_METHOD(exports, "add", add);
 		NODE_SET_METHOD(exports, "exports", RunCallback);
+		NODE_SET_METHOD(exports, "createObject", CreateObject);
+		NODE_SET_METHOD(exports, "sub", sub);
 	}
 
 	/**

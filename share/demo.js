@@ -1,7 +1,3 @@
 var share = require('./build/Release/share.node');
 
-console.log(share.add(3,10,20,30,40));
-
-share.exports(function(){
-	console.log(arguments);
-});
+console.log( share.sub([1,2,3,4,5,"203","AB"]) );
