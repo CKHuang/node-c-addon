@@ -11,6 +11,19 @@ namespace share {
 	using v8::Array;
 	using v8::Object;
 
+	void subv2(const FunctionCallbackInfo<Value>& args) {
+		Isolate* isolate = args.GetIsolate();
+		int argLen = args.Length();
+		double _count = 0;
+		for( int i = 0; i < argLen; i ++ ) {
+			if (args[i]->IsNumber())
+			{
+				_count += args[i]->NumberValue();
+			}
+		}
+		Local<Number> result = Number::New(isolate,_count);
+		args.GetReturnValue().Set(result);
+	}
 
 	void sub(const FunctionCallbackInfo<Value>& args) {
 		Isolate* isolate = args.GetIsolate();
@@ -23,7 +36,7 @@ namespace share {
 			));
 			return ;
 		}
-		
+
 		double cout = 0;
 
 		// 获取参数中的数组数据
@@ -129,6 +142,7 @@ namespace share {
 		NODE_SET_METHOD(exports, "exports", RunCallback);
 		NODE_SET_METHOD(exports, "createObject", CreateObject);
 		NODE_SET_METHOD(exports, "sub", sub);
+		NODE_SET_METHOD(exports, "subv2", subv2);
 	}
 
 	/**
