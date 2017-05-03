@@ -2,7 +2,7 @@
     "targets" : [
         {
             "target_name" : "share",
-            "sources" : ["./src/main.cc"]
+            "sources" : ["./src/binding.cc"]
         }
     ]
 }
