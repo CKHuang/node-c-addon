@@ -1,8 +1,8 @@
 {
     "targets" : [
         {
-            "target_name" : "share",
-            "sources" : ["./src/binding.cc"]
+            "target_name" : "shm",
+            "sources" : ["./src/shm.cc"]
         }
     ]
 }
