@@ -5,6 +5,50 @@
 using namespace v8;
 using namespace std;
 
+void SetReturnFunction(const FunctionCallbackInfo<Value>& args) 
+{
+	Isolate* isolate = args.GetIsolate();
+	args.GetReturnValue().Set(String::NewFromUtf8(isolate,"Hello World!"));
+}
+
+void SetReturn( const FunctionCallbackInfo<Value>& args) 
+{
+	Isolate* isolate = args.GetIsolate();
+
+	// Number 类型
+	Local<Number> num = Number::New(isolate,100);
+
+	// string 类型
+	Local<String> str = String::NewFromUtf8(isolate,"Hello World");
+
+	// array 类型
+	Local<Array> array = Array::New(isolate);
+	array->Set(0, Number::New(isolate,1));
+	array->Set(1, Number::New(isolate,100));
+	
+	// Undefined 类型
+	Local<Value> und = Undefined(isolate);
+
+	// Boolean 类型
+	Local<Boolean> flag = Boolean::New(isolate, true);
+
+	// Function 类型
+	Local<FunctionTemplate> tpl = FunctionTemplate::New(isolate,SetReturnFunction);
+	Local<Function> fn = tpl->GetFunction();
+
+	// object 类型
+	Local<Object> obj = Object::New(isolate);
+	obj->Set(String::NewFromUtf8(isolate,"string"),str);
+	obj->Set(String::NewFromUtf8(isolate,"number"),num);
+	obj->Set(String::NewFromUtf8(isolate,"array"),array);
+	obj->Set(String::NewFromUtf8(isolate,"undef"),und);
+	obj->Set(String::NewFromUtf8(isolate, "bool"), flag);
+	obj->Set(String::NewFromUtf8(isolate, "fun"), fn);
+
+
+	args.GetReturnValue().Set(obj);
+}
+
 void GetArgument( const FunctionCallbackInfo<Value>& args ) 
 {
 	Isolate* isolate = args.GetIsolate();
@@ -65,7 +109,7 @@ void GetArgument( const FunctionCallbackInfo<Value>& args )
 
 	// js function 类型
 	Local<Function> cb = Local<Function>::Cast(args[5]);
-	const unsigned argc = 2;
+	const unsigned argc = 3; // callback 返回数据的个数
 	Local<Value> argv[2];
 	argv[0] = String::NewFromUtf8(isolate,"aaa"); // 不能使用单引号
 	argv[1] = String::NewFromUtf8(isolate,"bbb");
@@ -79,6 +123,7 @@ void GetArgument( const FunctionCallbackInfo<Value>& args )
 void init( Local<Object> exports)
 {
 	NODE_SET_METHOD(exports, "getArguments", GetArgument);
+	NODE_SET_METHOD(exports, "setReturn", SetReturn);
 }
 
 NODE_MODULE(arguments,init);
