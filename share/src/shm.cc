@@ -49,8 +49,7 @@ namespace shm
 			return ;
 		}
 
-		printf("shmid : %d\n", shmid);
-
+		//printf("shmid : %d\n", shmid);
 
 
 		/**
@@ -89,18 +88,56 @@ namespace shm
 		String::Utf8Value utfValue(value);
 
 		char* str = (char*) *utfValue;
+		strncpy(shmaddr, str, 1024);
 
-		printf("set value %s\n",str);
+		args.GetReturnValue().Set(String::NewFromUtf8(isolate,"success"));
+	}
 
-		/**
-		 * 将申请映射的共享内存空间的首前N个字符设置为\3
-		 */
-		memset(shmaddr,'\3',10);
+
+	void read ( const FunctionCallbackInfo<Value>& args ) 
+	{
+		Isolate* isolate = args.GetIsolate();
+
+		key_t key= ftok("demo.c", 'R');
+		int shmid = shmget(key,1024, 0777 | IPC_CREAT);
+
+		if ( shmid < 0 )
+		{
+			printf("shmget error , %d\n", errno);
+
+			isolate->ThrowException(Exception::Error(
+				String::NewFromUtf8(isolate,"shmget error!")
+			));
+			return ;
+		}
+
+		//printf("shmid : %d\n", shmid);
+
+		char* shmaddr = (char*) shmat(shmid,NULL,0);
+
+		if ((char *) -1 == shmaddr)
+		{	
+			/*
+			 * 调试运行的时候会报errno 13的错误
+			 * 详见：http://stackoverflow.com/questions/19463957/shmat-returns-segmentation-falut-with-errno-13eacces
+			 */
+			printf("shmat error info, %d\n",errno);
+
+			isolate->ThrowException(Exception::Error(
+				String::NewFromUtf8(isolate,"shmat error!")
+			));
+			return ;
+		}
+
+		args.GetReturnValue().Set(String::NewFromUtf8(isolate,shmaddr));
+
+		//printf("get shm data %s\n", shmaddr);
 	}
 
 	void init( Local<Object> exports ) 
 	{
 		NODE_SET_METHOD(exports, "write", write);
+		NODE_SET_METHOD(exports, "read", read);
 	}
 
 	NODE_MODULE(shm, init);
