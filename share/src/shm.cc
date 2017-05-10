@@ -1,15 +1,13 @@
 #define _SVID_SOURCE
 #include <node.h>
-#include <sys/shm.h>
 #include <errno.h>
 #include <iostream>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 using namespace v8;
 using namespace std;
-
-const char* ToCString(const String::Utf8Value& value) {
-  return *value ? *value : "<string conversion failed>";
-}
 
 namespace shm 
 {
@@ -28,7 +26,7 @@ namespace shm
 	{
 		Isolate* isolate = args.GetIsolate();
 
-		key_t key= ftok("demo.c", 'R');
+		key_t key= 10459;
 
 		/**
 		 * 申请一片共享内存，
@@ -90,7 +88,50 @@ namespace shm
 		char* str = (char*) *utfValue;
 		strncpy(shmaddr, str, 1024);
 
+
+		/**
+		 * 断开连接
+		 */
+		int ret = shmdt(shmaddr);
+
+		if ( ret != 0 )
+		{
+			printf("shmdt error info, %d\n",ret);
+
+			isolate->ThrowException(Exception::Error(
+				String::NewFromUtf8(isolate,"shmdt error!")
+			));
+			return ;
+		}
+
 		args.GetReturnValue().Set(String::NewFromUtf8(isolate,"success"));
+	}
+
+	/**
+	 * 删除某个对应的共享内存块
+	 * @param args [description]
+	 */
+	void delt ( const FunctionCallbackInfo<Value>& args ) 
+	{
+		Isolate* isolate = args.GetIsolate();
+
+		key_t key= 10459;
+
+		int shmid = shmget(key,1024, 0777 | IPC_CREAT);
+
+		if ( shmid < 0 )
+		{
+			printf("shmget error , %d\n", errno);
+
+			isolate->ThrowException(Exception::Error(
+				String::NewFromUtf8(isolate,"shmget error!")
+			));
+			return ;
+		}
+
+		int ret = shmctl(shmid, IPC_RMID, 0);
+
+		printf("shmctl delete %d\n", ret);
 	}
 
 
@@ -98,7 +139,8 @@ namespace shm
 	{
 		Isolate* isolate = args.GetIsolate();
 
-		key_t key= ftok("demo.c", 'R');
+		key_t key= 10459;
+
 		int shmid = shmget(key,1024, 0777 | IPC_CREAT);
 
 		if ( shmid < 0 )
@@ -131,6 +173,22 @@ namespace shm
 
 		args.GetReturnValue().Set(String::NewFromUtf8(isolate,shmaddr));
 
+		/**
+		 * 断开连接
+		 */
+		int ret = shmdt(shmaddr);
+
+		if ( ret != 0 )
+		{
+			printf("shmdt error info, %d\n",ret);
+
+			isolate->ThrowException(Exception::Error(
+				String::NewFromUtf8(isolate,"shmdt error!")
+			));
+			return ;
+		}
+
+
 		//printf("get shm data %s\n", shmaddr);
 	}
 
@@ -138,6 +196,7 @@ namespace shm
 	{
 		NODE_SET_METHOD(exports, "write", write);
 		NODE_SET_METHOD(exports, "read", read);
+		NODE_SET_METHOD(exports, "delt", delt);
 	}
 
 	NODE_MODULE(shm, init);

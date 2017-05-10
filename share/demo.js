@@ -1,8 +1,9 @@
-var share = require('./build/Release/shm.node');
+const share = require('./build/Release/shm.node');
 const cluster = require('cluster');
 const http = require('http');
 const numCPUs = require('os').cpus().length;
 
+var count = 0;
 
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
@@ -18,8 +19,19 @@ if (cluster.isMaster) {
 } else {
   // Workers can share any TCP connection
   // In this case it is an HTTP server
-  var data = share.read();
-  console.log(data);
+  http.createServer((req, res) => {
+
+    var count = share.read();
+    if (!count || count == "") {
+      count = 0;
+    } else {
+      count = parseInt(count,10) + 1;
+      console.log(count,`${process.pid}`);
+    }
+    share.write(String(count));
+    res.writeHead(200);
+    res.end('hello world\n');
+  }).listen(8000);
 
   console.log(`Worker ${process.pid} started`);
 }
